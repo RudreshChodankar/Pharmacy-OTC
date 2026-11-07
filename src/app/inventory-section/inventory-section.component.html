@@ -1,0 +1,31 @@
+<div class="page-heading">
+  <div><div class="eyebrow">PHARMACY STOCK OVERVIEW <span class="live-dot"></span> STORE OPEN</div><h1>Inventory</h1><p class="subtitle">Keep your shelves stocked and your customers cared for.</p></div>
+  <button class="primary-button" (click)="addMedicine.emit()"><span>＋</span> Add medicine</button>
+</div>
+<section class="stats-grid">
+  <article class="stat-card"><div class="stat-top"><span>Total medicines</span><span class="stat-icon teal">▣</span></div><div class="stat-value">{{medicines.length}}<small>items</small></div><div class="stat-foot">Across {{categories.length - 1}} categories</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Inventory value</span><span class="stat-icon mint">₹</span></div><div class="stat-value">₹{{stockValue | number:'1.0-0'}}</div><div class="stat-foot">Based on current unit pricing</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Running low</span><span class="stat-icon amber">↘</span></div><div class="stat-value">{{lowCount}}<small>items</small></div><div class="stat-foot"><span class="warn-dot"></span>Needs attention soon</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Out of stock</span><span class="stat-icon rose">⊘</span></div><div class="stat-value">{{outCount}}<small>items</small></div><div class="stat-foot">{{expiringCount}} items expiring in 90 days</div></article>
+</section>
+<section class="inventory-panel">
+  <div class="panel-heading"><div><h2>Medicine inventory <span class="total-pill">{{filtered.length}}</span></h2><p>Manage and monitor your pharmacy stock</p></div><button class="export-button"><span>⇩</span> Export</button></div>
+  <div class="filters">
+    <label class="search-box"><span>⌕</span><input [(ngModel)]="search" placeholder="Search medicine, SKU, supplier..."></label>
+    <label class="select-wrap"><select [(ngModel)]="categoryFilter"><option>All categories</option><option *ngFor="let category of categories">{{category}}</option></select><span>⌄</span></label>
+    <label class="select-wrap"><select [(ngModel)]="stockFilter"><option>All stock</option><option>In stock</option><option>Low stock</option><option>Out of stock</option></select><span>⌄</span></label>
+    <button class="filter-button" (click)="resetFilters()">↻ <span>Reset</span></button>
+  </div>
+  <div class="table-scroll"><table><thead><tr><th>MEDICINE</th><th>CATEGORY</th><th>STOCK LEVEL</th><th>UNIT PRICE</th><th>EXPIRY DATE</th><th>SUPPLIER</th><th></th></tr></thead>
+    <tbody><tr *ngFor="let medicine of filtered">
+      <td><div class="medicine-cell"><div class="medicine-icon" [class.purple]="medicine.category === 'Antibiotics'" [class.blue]="medicine.category === 'Allergy'" [class.orange]="medicine.category === 'Vitamins'" [class.pink]="medicine.category === 'Digestive health'" [class.gold]="medicine.category === 'First aid'">✚</div><div><strong>{{medicine.name}}</strong><small>{{medicine.generic}} <span>·</span> {{medicine.sku}}</small></div></div></td>
+      <td><span class="category-chip">{{medicine.category}}</span></td>
+      <td><div class="stock-cell"><strong [class.stock-zero]="medicine.stock === 0">{{medicine.stock}} <small>{{medicine.unit}}</small></strong><span class="status-pill" [ngClass]="statusClass(medicine)"><i></i>{{stockStatus(medicine)}}</span></div></td>
+      <td class="price">₹{{medicine.price | number:'1.2-2'}}</td>
+      <td><span class="expiry" [ngClass]="expiryClass(medicine)">{{formatDate(medicine.expiry)}}</span><span *ngIf="expiryClass(medicine) === 'soon'" class="expiry-label">Expiring soon</span><span *ngIf="expiryClass(medicine) === 'expired'" class="expiry-label">Expired</span></td>
+      <td class="supplier">{{medicine.supplier}}</td><td><div class="row-actions"><button title="Edit medicine" (click)="editMedicine.emit(medicine)">✎</button><button title="Remove medicine" (click)="removeMedicine.emit(medicine)">⋯</button></div></td>
+    </tr><tr *ngIf="filtered.length === 0"><td colspan="7" class="empty-state">No medicines match your search. Try changing your filters.</td></tr></tbody>
+  </table></div>
+  <footer class="table-footer"><span>Showing <strong>{{filtered.length ? 1 : 0}}–{{filtered.length}}</strong> of <strong>{{medicines.length}}</strong> medicines</span><div class="pagination"><button disabled>‹</button><button class="current-page">1</button><button disabled>›</button></div></footer>
+</section>
+<div class="page-note"><span>✦</span> Stock counts update as you make changes.</div>

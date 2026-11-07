@@ -1,0 +1,53 @@
+<div class="page-heading sales-heading"><div><div class="eyebrow">POINT OF SALE <span class="live-dot"></span> READY</div><h1>Sales</h1><p class="subtitle">Build a customer order, take payment, and print a bill.</p></div></div>
+
+<section class="stats-grid sales-stats">
+  <article class="stat-card"><div class="stat-top"><span>Sales today</span><span class="stat-icon teal">₹</span></div><div class="stat-value">₹{{todayTotal | number:'1.2-2'}}</div><div class="stat-foot">{{todaySales.length}} bills generated</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Items sold today</span><span class="stat-icon mint">▣</span></div><div class="stat-value">{{todayUnits}}<small>units</small></div><div class="stat-foot">Across today’s completed bills</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Available products</span><span class="stat-icon blue">＋</span></div><div class="stat-value">{{availableMedicines.length}}<small>items</small></div><div class="stat-foot">Products with stock available</div></article>
+</section>
+
+<div class="sales-layout">
+  <section class="sales-builder">
+    <div class="panel-heading sales-panel-heading"><div><h2>New sale</h2><p>Add medicines to the customer’s bill.</p></div><span class="sale-badge">New bill</span></div>
+    <div class="sale-customer-fields">
+      <label class="field">Customer name <span class="optional-label">Optional</span><input name="customerName" [(ngModel)]="customerName" placeholder="Walk-in customer"></label>
+      <label class="field">Phone number <span class="optional-label">Optional</span><input name="customerPhone" [(ngModel)]="customerPhone" type="tel" placeholder="Customer contact"></label>
+    </div>
+    <div class="sale-add-row">
+      <label class="field medicine-select-field">Medicine<select name="saleMedicine" [(ngModel)]="medicineId"><option *ngFor="let medicine of availableMedicines" [ngValue]="medicine.id">{{medicine.name}} · {{medicine.stock}} {{medicine.unit}} available</option></select></label>
+      <label class="field quantity-field">Qty<input type="number" name="saleQuantity" [(ngModel)]="quantity" min="1" step="1" [max]="selectedMedicine ? selectedMedicine.stock : 1"></label>
+      <button class="secondary-button add-line-button" type="button" (click)="addToCart()" [disabled]="!availableMedicines.length">Add item</button>
+    </div>
+    <div class="sale-error" *ngIf="error">{{error}}</div>
+    <div class="sale-cart">
+      <div class="sale-cart-heading"><strong>Bill items</strong><span>{{cart.length}} {{cart.length === 1 ? 'product' : 'products'}}</span></div>
+      <div class="sale-cart-empty" *ngIf="cart.length === 0"><span class="empty-icon">＋</span><strong>No items added</strong><span>Select a medicine above to start this bill.</span></div>
+      <div class="sale-line" *ngFor="let line of cart"><div class="sale-line-info"><strong>{{line.name}}</strong><small>{{line.sku}} · ₹{{line.unitPrice | number:'1.2-2'}} / {{line.unit}}</small></div><span class="sale-line-qty">{{line.quantity}} {{line.unit}}</span><strong class="sale-line-total">₹{{line.lineTotal | number:'1.2-2'}}</strong><button class="remove-line" type="button" title="Remove item" (click)="removeFromCart(line)">×</button></div>
+    </div>
+    <div class="sale-summary"><div><span>Subtotal</span><strong>₹{{cartTotal | number:'1.2-2'}}</strong></div><div class="sale-grand-total"><span>Total due</span><strong>₹{{cartTotal | number:'1.2-2'}}</strong></div></div>
+    <div class="sale-checkout-row"><label class="field payment-field">Payment method<select name="paymentMethod" [(ngModel)]="paymentMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Other</option></select></label><button class="primary-button generate-bill-button" type="button" (click)="generateBill()" [disabled]="cart.length === 0"><span>▤</span> Generate bill</button></div>
+  </section>
+
+  <section class="sales-history">
+    <div class="panel-heading sales-panel-heading"><div><h2>Recent bills</h2><p>Completed customer transactions</p></div><span class="total-pill">{{sales.length}}</span></div>
+    <div class="sale-history-list" *ngIf="sales.length">
+      <button class="sale-history-row" *ngFor="let bill of sales | slice:0:8" (click)="openBill(bill)"><span class="history-icon">▤</span><span class="history-details"><strong>{{bill.customerName}}</strong><small>{{bill.invoiceNumber}} · {{formatDate(bill.issuedAt)}} {{formatTime(bill.issuedAt)}}</small></span><span class="history-amount">₹{{bill.total | number:'1.2-2'}}</span><span class="history-chevron">›</span></button>
+    </div>
+    <div class="sale-history-empty" *ngIf="sales.length === 0"><span class="empty-icon">▤</span><strong>No bills yet</strong><span>Your completed sales will appear here.</span></div>
+  </section>
+</div>
+
+<div class="overlay bill-overlay" *ngIf="showBill && currentBill" (click)="closeBill()">
+  <section class="bill-dialog" (click)="$event.stopPropagation()">
+    <div class="bill-toolbar"><div><div class="eyebrow">BILL GENERATED</div><h2>Sale complete</h2></div><button class="close-button" (click)="closeBill()">×</button></div>
+    <div class="printable-bill" id="printable-bill">
+      <div class="bill-brand"><div class="bill-brand-mark">✚</div><div><strong>Greenfield Pharmacy</strong><small>PHARMACY TAX INVOICE</small></div></div>
+      <div class="bill-rule"></div>
+      <div class="bill-meta"><div><span>Bill number</span><strong>{{currentBill.invoiceNumber}}</strong></div><div><span>Date</span><strong>{{formatDate(currentBill.issuedAt)}} · {{formatTime(currentBill.issuedAt)}}</strong></div><div><span>Customer</span><strong>{{currentBill.customerName}}</strong></div><div *ngIf="currentBill.customerPhone"><span>Phone</span><strong>{{currentBill.customerPhone}}</strong></div></div>
+      <table class="bill-items"><thead><tr><th>Medicine</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody><tr *ngFor="let line of currentBill.items"><td><strong>{{line.name}}</strong><small>{{line.sku}}</small></td><td>{{line.quantity}}</td><td>₹{{line.unitPrice | number:'1.2-2'}}</td><td>₹{{line.lineTotal | number:'1.2-2'}}</td></tr></tbody></table>
+      <div class="bill-total"><div><span>Subtotal</span><strong>₹{{currentBill.subtotal | number:'1.2-2'}}</strong></div><div class="bill-total-due"><span>Total paid</span><strong>₹{{currentBill.total | number:'1.2-2'}}</strong></div><div><span>Payment</span><strong>{{currentBill.paymentMethod}}</strong></div></div>
+      <div class="bill-thanks">Thank you for choosing Greenfield Pharmacy.</div>
+    </div>
+    <div class="bill-actions"><button class="cancel-button" (click)="closeBill()">Done</button><button class="primary-button" (click)="printBill()"><span>▣</span> Print bill</button></div>
+  </section>
+</div>

@@ -1,0 +1,29 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"><span>✚</span></div><div><strong>medistock</strong><small>PHARMACY MANAGER</small></div></div>
+    <div class="store-switch"><div class="store-icon">✚</div><div><small>YOUR STORE</small><strong>Greenfield Pharmacy</strong></div><span class="chevron">⌄</span></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav>
+      <button [class.selected]="activeNav === 'Overview'" (click)="setNav('Overview')"><span class="nav-icon">▦</span>Overview</button>
+      <button [class.selected]="activeNav === 'Inventory'" (click)="setNav('Inventory')"><span class="nav-icon">▣</span>Inventory <span class="nav-count">{{medicines.length}}</span></button>
+      <button [class.selected]="activeNav === 'Low stock'" (click)="setNav('Low stock')"><span class="nav-icon">◉</span>Low stock <span class="nav-alert">{{lowCount}}</span></button>
+      <button [class.selected]="activeNav === 'Incoming stock'" (click)="setNav('Incoming stock')"><span class="nav-icon">↓</span>Incoming stock</button>
+      <button [class.selected]="activeNav === 'Sales'" (click)="setNav('Sales')"><span class="nav-icon">₹</span>Sales</button>
+      <button [class.selected]="activeNav === 'Suppliers'" (click)="setNav('Suppliers')"><span class="nav-icon">♧</span>Suppliers</button>
+      <button [class.selected]="activeNav === 'Reports'" (click)="setNav('Reports')"><span class="nav-icon">▤</span>Reports</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="help-card"><div class="help-symbol">?</div><strong>Need a hand?</strong><p>Visit our help center for tips and guides.</p><button>Go to help center <span>↗</span></button></div><button class="profile"><div class="avatar">AM</div><span><strong>Arjun Mehta</strong><small>Store administrator</small></span><b>•••</b></button></div>
+  </aside>
+  <main class="main-area">
+    <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong>{{activeNav}}</strong></div><div class="top-actions"><button class="icon-button" aria-label="Notifications">♧<i></i></button><span class="top-divider"></span><div class="top-avatar">AM</div><span class="top-user">Arjun Mehta</span><span class="chevron">⌄</span></div></header>
+    <div class="content">
+      <app-overview-section *ngIf="activeNav === 'Overview'" [medicines]="medicines" [receipts]="receipts" (navigate)="setNav($event)"></app-overview-section>
+      <app-inventory-section *ngIf="activeNav === 'Inventory' || activeNav === 'Low stock'" [medicines]="medicines" [initialStockFilter]="activeNav === 'Low stock' ? 'Low stock' : 'All stock'" (addMedicine)="openAdd()" (editMedicine)="edit($event)" (removeMedicine)="remove($event)"></app-inventory-section>
+      <app-incoming-stock-section *ngIf="activeNav === 'Incoming stock'" [medicines]="medicines" [receipts]="receipts" (stockReceived)="receiveStock($event)"></app-incoming-stock-section>
+      <app-sales-section *ngIf="activeNav === 'Sales'" [medicines]="medicines" [sales]="sales" (billGenerated)="completeSale($event)"></app-sales-section>
+      <section class="inventory-panel placeholder-panel" *ngIf="activeNav === 'Suppliers' || activeNav === 'Reports'"><div class="panel-heading"><div><h2>{{activeNav}}</h2><p>This section is ready for the next workflow.</p></div></div></section>
+    </div>
+  </main>
+  <div class="overlay" *ngIf="showModal" (click)="closeModal()"><section class="modal" (click)="$event.stopPropagation()"><div class="modal-head"><div><div class="eyebrow">INVENTORY ITEM</div><h2>{{editingId !== null ? 'Edit medicine' : 'Add medicine'}}</h2></div><button class="close-button" (click)="closeModal()">×</button></div><p class="modal-description">Add product details to keep your stock records accurate.</p><form #medicineForm="ngForm" (ngSubmit)="submit()"><label class="field">Medicine name<input name="name" [(ngModel)]="form.name" required placeholder="e.g. Paracetamol 500mg"></label><label class="field">Generic name<input name="generic" [(ngModel)]="form.generic" placeholder="Active ingredient"></label><div class="form-row"><label class="field">Category<select name="category" [(ngModel)]="form.category"><option *ngFor="let category of categories">{{category}}</option></select></label><label class="field">SKU<input name="sku" [(ngModel)]="form.sku" required></label></div><div class="form-row"><label class="field">Quantity in stock<input type="number" min="0" name="stock" [(ngModel)]="form.stock" required></label><label class="field">Unit<select name="unit" [(ngModel)]="form.unit"><option>tablets</option><option>capsules</option><option>bottles</option><option>packs</option><option>sachets</option></select></label></div><div class="form-row"><label class="field">Unit price (₹)<input type="number" min="0" step="0.01" name="price" [(ngModel)]="form.price" required></label><label class="field">Expiry date<input type="date" name="expiry" [(ngModel)]="form.expiry" required></label></div><label class="field">Supplier<input name="supplier" [(ngModel)]="form.supplier" placeholder="Supplier name"></label><div class="modal-actions"><button type="button" class="cancel-button" (click)="closeModal()">Cancel</button><button type="submit" class="primary-button" [disabled]="!medicineForm.form.valid">{{editingId !== null ? 'Save changes' : 'Add medicine'}}</button></div></form></section></div>
+  <div class="toast" *ngIf="toast">✓ &nbsp;{{toast}}</div>
+</div>

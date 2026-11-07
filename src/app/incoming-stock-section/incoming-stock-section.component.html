@@ -1,0 +1,17 @@
+<div class="page-heading"><div><div class="eyebrow">INVENTORY MANAGEMENT</div><h1>Incoming stock</h1><p class="subtitle">Record deliveries and update on-hand quantities.</p></div></div>
+<section class="incoming-panel">
+  <div class="panel-heading"><div><h2>Receive a delivery</h2><p>Record the items received from your supplier.</p></div><span class="incoming-badge">{{receipts.length}} receipts logged</span></div>
+  <form class="incoming-form" #receiptForm="ngForm" (ngSubmit)="receiveStock()">
+    <label class="field">Medicine<select name="medicineId" [(ngModel)]="form.medicineId" required><option *ngFor="let medicine of medicines" [ngValue]="medicine.id">{{medicine.name}} · {{medicine.sku}}</option></select></label>
+    <label class="field">Quantity received<input type="number" name="quantity" [(ngModel)]="form.quantity" min="1" step="1" required></label>
+    <label class="field">Supplier<input name="supplier" [(ngModel)]="form.supplier" placeholder="Uses listed supplier if blank"></label>
+    <label class="field">Delivery reference<input name="reference" [(ngModel)]="form.reference" placeholder="Invoice or PO number"></label>
+    <label class="field">Received date<input type="date" name="receivedDate" [(ngModel)]="form.receivedDate" required></label>
+    <button type="submit" class="primary-button" [disabled]="!receiptForm.form.valid || medicines.length === 0"><span>＋</span> Receive stock</button>
+  </form>
+  <div class="receipt-list" *ngIf="receipts.length">
+    <div class="receipt-list-heading"><strong>Recent receipts</strong><span>Latest first</span></div>
+    <div class="receipt-row" *ngFor="let receipt of receipts | slice:0:5"><div class="receipt-icon">↓</div><div class="receipt-product"><strong>{{receipt.medicineName}}</strong><small>{{receipt.supplier}}<span *ngIf="receipt.reference"> · {{receipt.reference}}</span></small></div><span class="receipt-quantity">+{{receipt.quantity}} {{receipt.unit}}</span><span class="receipt-date">{{formatDate(receipt.receivedDate)}}</span></div>
+  </div>
+  <div class="receipt-empty" *ngIf="receipts.length === 0">No deliveries recorded yet. Received stock will appear here.</div>
+</section>

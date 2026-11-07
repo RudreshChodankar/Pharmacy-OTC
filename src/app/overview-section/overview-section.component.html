@@ -1,0 +1,48 @@
+<div class="page-heading overview-heading">
+  <div><div class="eyebrow">{{todayLabel | uppercase}}</div><h1>{{greeting}}, Arjun</h1><p class="subtitle">Here’s what’s happening at Greenfield Pharmacy today.</p></div>
+  <button class="primary-button" (click)="navigate.emit('Incoming stock')"><span>＋</span> Record delivery</button>
+</div>
+
+<section class="stats-grid overview-stats">
+  <article class="stat-card"><div class="stat-top"><span>Medicines in catalog</span><span class="stat-icon teal">▣</span></div><div class="stat-value">{{medicines.length}}<small>products</small></div><div class="stat-foot">Across {{categorySummaries.length}} categories</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Units on hand</span><span class="stat-icon mint">＋</span></div><div class="stat-value">{{totalUnits | number}}</div><div class="stat-foot">Current available stock</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Inventory value</span><span class="stat-icon blue">₹</span></div><div class="stat-value">₹{{stockValue | number:'1.0-0'}}</div><div class="stat-foot">At listed unit prices</div></article>
+  <article class="stat-card"><div class="stat-top"><span>Needs attention</span><span class="stat-icon amber">!</span></div><div class="stat-value">{{lowCount + outCount}}<small>items</small></div><div class="stat-foot">{{lowCount}} low · {{outCount}} out of stock</div></article>
+</section>
+
+<div class="overview-grid">
+  <section class="overview-card stock-health-card">
+    <div class="overview-card-heading"><div><h2>Stock health</h2><p>Products grouped by current quantity</p></div><button class="text-link" (click)="navigate.emit('Inventory')">View inventory <span>↗</span></button></div>
+    <div class="health-summary"><div class="health-total"><strong>{{medicines.length}}</strong><span>products tracked</span></div><div class="health-legend"><span><i class="legend-good"></i>Healthy</span><span><i class="legend-low"></i>Low</span><span><i class="legend-out"></i>Out</span></div></div>
+    <div class="health-bars">
+      <div class="health-row"><div><span>Healthy stock</span><strong>{{medicines.length - lowCount - outCount}}</strong></div><div class="overview-track"><i class="bar-good" [style.width.%]="medicines.length ? (medicines.length - lowCount - outCount) / medicines.length * 100 : 0"></i></div></div>
+      <div class="health-row"><div><span>Running low</span><strong>{{lowCount}}</strong></div><div class="overview-track"><i class="bar-low" [style.width.%]="medicines.length ? lowCount / medicines.length * 100 : 0"></i></div></div>
+      <div class="health-row"><div><span>Out of stock</span><strong>{{outCount}}</strong></div><div class="overview-track"><i class="bar-out" [style.width.%]="medicines.length ? outCount / medicines.length * 100 : 0"></i></div></div>
+    </div>
+  </section>
+
+  <section class="overview-card category-card">
+    <div class="overview-card-heading"><div><h2>Stock by category</h2><p>Units currently on hand</p></div></div>
+    <div class="category-bars" *ngIf="categorySummaries.length">
+      <div class="category-row" *ngFor="let category of categorySummaries"><div class="category-row-label"><span>{{category.name}}</span><strong>{{category.units | number}}</strong></div><div class="overview-track"><i [style.width.%]="category.share"></i></div></div>
+    </div>
+    <div class="overview-empty" *ngIf="categorySummaries.length === 0">Add medicines to see category totals.</div>
+  </section>
+</div>
+
+<div class="overview-grid lower-overview-grid">
+  <section class="overview-card activity-card">
+    <div class="overview-card-heading"><div><h2>Recent incoming stock</h2><p>Latest deliveries recorded</p></div><button class="text-link" (click)="navigate.emit('Incoming stock')">All receipts <span>↗</span></button></div>
+    <div class="activity-list" *ngIf="recentReceipts.length">
+      <div class="activity-row" *ngFor="let receipt of recentReceipts"><div class="activity-icon">↓</div><div class="activity-description"><strong>{{receipt.medicineName}}</strong><small>{{receipt.supplier}}<span *ngIf="receipt.reference"> · {{receipt.reference}}</span></small></div><span class="activity-quantity">+{{receipt.quantity}} {{receipt.unit}}</span><span class="activity-date">{{formatDate(receipt.receivedDate)}}</span></div>
+    </div>
+    <div class="overview-empty" *ngIf="recentReceipts.length === 0"><span class="empty-icon">↓</span><strong>No deliveries recorded yet</strong><span>Incoming stock receipts will show here.</span><button class="text-link" (click)="navigate.emit('Incoming stock')">Record first delivery <span>↗</span></button></div>
+  </section>
+  <section class="overview-card attention-card">
+    <div class="overview-card-heading"><div><h2>Expiry watch</h2><p>Products expiring in the next 90 days</p></div><span class="expiry-watch-icon">◷</span></div>
+    <div class="expiry-count">{{expiringCount}}<small>products</small></div>
+    <div class="attention-note" *ngIf="expiringCount; else noExpiring"><span class="warn-dot"></span>Review expiry dates and plan replenishment.</div>
+    <ng-template #noExpiring><div class="attention-note attention-clear">No products are nearing expiry.</div></ng-template>
+    <button class="text-link" (click)="navigate.emit('Inventory')">Review inventory <span>↗</span></button>
+  </section>
+</div>
