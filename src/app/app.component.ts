@@ -89,5 +89,6 @@ export class AppComponent implements OnInit {
   }
   private saveInventory(): void { localStorage.setItem('medistock-inventory', JSON.stringify(this.medicines)); }
   notify(message: string): void { this.toast = message; setTimeout(() => this.toast = '', 2600); }
+  notifyExport(count: number): void { this.notify(count ? `Exported ${count} medicines to Excel.` : 'No medicines to export for the current filters.'); }
   setNav(name: string): void { this.activeNav = name; }
 }

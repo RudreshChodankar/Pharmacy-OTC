@@ -9,7 +9,7 @@
   <article class="stat-card"><div class="stat-top"><span>Out of stock</span><span class="stat-icon rose">⊘</span></div><div class="stat-value">{{outCount}}<small>items</small></div><div class="stat-foot">{{expiringCount}} items expiring in 90 days</div></article>
 </section>
 <section class="inventory-panel">
-  <div class="panel-heading"><div><h2>Medicine inventory <span class="total-pill">{{filtered.length}}</span></h2><p>Manage and monitor your pharmacy stock</p></div><button class="export-button"><span>⇩</span> Export</button></div>
+  <div class="panel-heading"><div><h2>Medicine inventory <span class="total-pill">{{filtered.length}}</span></h2><p>Manage and monitor your pharmacy stock</p></div><button class="export-button" (click)="exportInventory()"><span>⇩</span> Export to Excel</button></div>
   <div class="filters">
     <label class="search-box"><span>⌕</span><input [(ngModel)]="search" placeholder="Search medicine, SKU, supplier..."></label>
     <label class="select-wrap"><select [(ngModel)]="categoryFilter"><option>All categories</option><option *ngFor="let category of categories">{{category}}</option></select><span>⌄</span></label>
